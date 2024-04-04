@@ -4,6 +4,11 @@ import time
 import data
 import argparse
 
+# last time button pressed (joystick, button) -> timestamp
+joystick_button_to_timestamp = {}
+# should reset button timestamps? button -> bool
+should_reset = {}
+
 #prints the hat values
 def PrintHats(joysticks):
     for joystick in joysticks:
@@ -72,6 +77,16 @@ def SetDPadButton(gamepad, vigemButton, pressed):
     # else:
         # gamepad.directional_pad(vg.DS4_DPAD_DIRECTIONS.DS4_BUTTON_DPAD_NONE)
 
+#checks timestamps are within time frame of eachother
+def WithinTimeframe(timestamps):
+    max_value = max(timestamps)
+    min_value = min(timestamps)
+    return (max_value - min_value) < args.timeframe
+
+def ClearTimestamps(joysticks, button):
+    for joystick in joysticks:
+        joystick_button_to_timestamp[(joystick, button)] = 0
+
 #handles the buttons
 def HandleButtons(joysticks, virtual_gamepad):
     #cleanup from last frame
@@ -81,19 +96,57 @@ def HandleButtons(joysticks, virtual_gamepad):
 
     #for each button check if pressed
     for button in data.vg_buttons_xbox:
-        bothPressing = True
+        timestamps = []
+        anyonePressing = False
+        allPressing = True
         for joystick in joysticks:
+            #get pressed
             if "PS4" in joystick.get_name():
-                bothPressing &= IsPressedDS4(joystick, button)
+                pressed = IsPressedDS4(joystick, button)
             elif "Xbox" in joystick.get_name():
-                bothPressing &= IsPressedXbox(joystick, button)
+                pressed = IsPressedXbox(joystick, button)
+
+            #set state
+            allPressing &= pressed
+            anyonePressing |= pressed
+
+            #if resetting timestamps was true but no one is pressing still
+            if should_reset[button] and not anyonePressing:
+                should_reset[button] = False
+
+            #set timestamp if needed
+            if pressed:
+                joystick_button_to_timestamp[(joystick, button)] = time.time()
+            
+            #reset if needed
+            if should_reset[button]:
+                joystick_button_to_timestamp[(joystick, button)] = 0
+
+            #accumulate if not zero
+            currTimestamp = joystick_button_to_timestamp[(joystick, button)]
+            if currTimestamp != 0:
+                timestamps.append(currTimestamp)
+        
+        #check if within time interval
+        within = False
+        if len(timestamps) == len(joysticks):
+            within = WithinTimeframe(timestamps)
+        
+        #clear timestamp and set button pressed
+        if within:
+            allPressing = True
+            ClearTimestamps(joysticks, button)
+
+        #it's been pressed, reset until everyone releases button
+        if allPressing:
+            should_reset[button] = True
 
         #set virtual controller accordingly
         if args.ds4:
             button = data.xbox_to_ds4_vigembus[button]
-            SetDS4VirtualButton(virtual_gamepad, button, bothPressing)
+            SetDS4VirtualButton(virtual_gamepad, button, allPressing)
         else:
-            SetXboxVirtualButton(virtual_gamepad, button, bothPressing)
+            SetXboxVirtualButton(virtual_gamepad, button, allPressing)
 
 #Handles the left and right trigger buttons
 def HandleTriggerButtons(joysticks, virtual_gamepad):
@@ -109,34 +162,22 @@ def HandleTriggerButtons(joysticks, virtual_gamepad):
     lt_avg = lt_avg*.5 + .5 #remap from [-1,1] to [0,1]
     rt_avg = rt_avg*.5 + .5
 
-    # print(f"LT: {lt_avg}, RT: {rt_avg}")
-
     # Set the averaged values to the virtual gamepad
     virtual_gamepad.left_trigger_float(value_float=lt_avg)
     virtual_gamepad.right_trigger_float(value_float=rt_avg)
 
 #Handles the left and right analog sticks
 def HandleAnalogSticks(joysticks, virtual_gamepad):
-    # Read and average analog stick positions
     lx_sum = 0
     ly_sum = 0
     rx_sum = 0
     ry_sum = 0
 
     for joystick in joysticks:
-        # Assuming the left stick axes are 0 (X axis) and 1 (Y axis)
-        # Assuming the right stick axes are 3 (X axis) and 4 (Y axis)
-        # Adjust these axis numbers based on your controller
         lx_sum += joystick.get_axis(0)
         ly_sum += joystick.get_axis(1)
         rx_sum += joystick.get_axis(2)
         ry_sum += joystick.get_axis(3)
-
-        # if "PS4" in joystick.get_name():
-            # print(f"PS4 - LX: {joystick.get_axis(0)}, LY: {joystick.get_axis(1)}, RX: {joystick.get_axis(2)}, RY: {joystick.get_axis(3)}")
-        # if "Xbox" in joystick.get_name():
-            # print(f"Xbox - LX: {joystick.get_axis(0)}, LY: {joystick.get_axis(1)}, RX: {joystick.get_axis(2)}, RY: {joystick.get_axis(3)}")
-
 
     # Compute the simple average
     lx_avg = lx_sum / num_joysticks
@@ -157,6 +198,8 @@ def HandleAnalogSticks(joysticks, virtual_gamepad):
 # Create the parser
 parser = argparse.ArgumentParser(description="Combines 2 controllers into a single virtual one")
 parser.add_argument('--ds4', action='store_true', help='Makes the virtual controller a DS4, instead of Xbox 360')
+parser.add_argument('--framerate', type=float, default=120, help='Set the update framerate')
+parser.add_argument('--timeframe', type=float, default=.5, help='Set the time interval for checking button presses')
 args = parser.parse_args()
 
 # Initialize Pygame for controller input
@@ -174,6 +217,13 @@ if num_joysticks == 0:
 joysticks = [pygame.joystick.Joystick(i) for i in range(num_joysticks)]
 for joystick in joysticks:
     joystick.init()
+    #timestamp dict
+    for button in data.vg_buttons_xbox:
+        joystick_button_to_timestamp[(joystick, button)] = 0
+
+#initialize should reset
+for button in data.vg_buttons_xbox:
+    should_reset[button] = False
 
 #print out controller names
 for joystick in joysticks:
@@ -184,6 +234,8 @@ if args.ds4:
     virtual_gamepad = vg.VDS4Gamepad()
 else:
     virtual_gamepad = vg.VX360Gamepad()
+
+sleep_time = 1/args.framerate
 
 # Main loop
 running = True
@@ -203,7 +255,7 @@ while running:
     virtual_gamepad.update()
 
     #small delay
-    time.sleep(0.001)
+    time.sleep(sleep_time)
 
 # Cleanup
 pygame.quit()
