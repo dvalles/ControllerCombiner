@@ -20,15 +20,15 @@ class CombinedController:
         self.buttons = {button: False for button in data.vg_buttons_xbox}
 
 #Combine controllers into one representation, return that representation
-def GetCombinedControllers(controllers, button_press_timeframe):
+def get_combined_controllers(controllers, button_press_timeframe):
     cc = CombinedController()
-    cc.analogs = _handleAnalogSticks(controllers)
-    cc.triggers = _handleTriggerButtons(controllers)
-    cc.buttons = _handleButtons(controllers, button_press_timeframe)
+    cc.analogs = _handle_analog_sticks(controllers)
+    cc.triggers = _handle_trigger_buttons(controllers)
+    cc.buttons = _handle_buttons(controllers, button_press_timeframe)
     return cc
 
 #Initializes the necessary state
-def Initialize(controllers):
+def initialize(controllers):
     #initialize timestamp dict
     for controller in controllers:
         for button in data.vg_buttons_xbox:
@@ -38,7 +38,7 @@ def Initialize(controllers):
         should_reset[button] = False
 
 #Handles the left and right trigger buttons
-def _handleTriggerButtons(controllers):
+def _handle_trigger_buttons(controllers):
     num_controllers = len(controllers)
     lt_sum = 0
     rt_sum = 0
@@ -55,7 +55,7 @@ def _handleTriggerButtons(controllers):
     return (lt_avg, rt_avg)
 
 #Handles the left and right analog sticks
-def _handleAnalogSticks(controllers):
+def _handle_analog_sticks(controllers):
     num_controllers = len(controllers)
     lx_sum = 0
     ly_sum = 0
@@ -77,7 +77,7 @@ def _handleAnalogSticks(controllers):
     return (lx_avg, ly_avg, rx_avg, ry_avg)
 
 #handles the buttons
-def _handleButtons(controllers, press_timeframe):
+def _handle_buttons(controllers, press_timeframe):
     result = {}
 
     #for each virtual button check if physical counterpart is 'pressed' in that all physical controllers are pressing
@@ -95,9 +95,9 @@ def _check_button(controllers, virtual_button, press_timeframe):
     for controller in controllers:
         #get pressed
         if "PS4" in controller.get_name():
-            pressed = _isPressedDS4(controller, virtual_button)
+            pressed = _is_pressed_ds4(controller, virtual_button)
         elif "Xbox" in controller.get_name():
-            pressed = _isPressedXbox(controller, virtual_button)
+            pressed = _is_pressed_xbox(controller, virtual_button)
 
         #set state
         all_pressing &= pressed
@@ -123,12 +123,12 @@ def _check_button(controllers, virtual_button, press_timeframe):
     #check if within time interval
     within = False
     if len(timestamps) == len(controllers):
-        within = _withinTimeframe(timestamps, press_timeframe)
+        within = _within_timeframe(timestamps, press_timeframe)
     
     #clear timestamp and set button pressed
     if within:
         all_pressing = True
-        _clearTimestamps(controllers, virtual_button)
+        _clear_timestamps(controllers, virtual_button)
 
     #it's been pressed, reset until everyone releases button
     if all_pressing:
@@ -138,12 +138,12 @@ def _check_button(controllers, virtual_button, press_timeframe):
 
 
 #gets if a button is down assuming a ds4
-def _isPressedDS4(controller, virtual_button):
+def _is_pressed_ds4(controller, virtual_button):
     correct_index = data.button_to_ps4_index[virtual_button]
     return controller.get_button(correct_index)
 
 #gets if a button is down assuming an xbox one
-def _isPressedXbox(controller, virtual_button):
+def _is_pressed_xbox(controller, virtual_button):
     #d-pad is special case
     if virtual_button == vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_LEFT:
         return controller.get_hat(0)[0] == -1
@@ -158,11 +158,11 @@ def _isPressedXbox(controller, virtual_button):
     return controller.get_button(correct_index)
 
 #checks timestamps are within time frame of eachother
-def _withinTimeframe(timestamps, press_timeframe):
+def _within_timeframe(timestamps, press_timeframe):
     max_value = max(timestamps)
     min_value = min(timestamps)
     return (max_value - min_value) < press_timeframe
 
-def _clearTimestamps(controllers, button):
+def _clear_timestamps(controllers, button):
     for controller in controllers:
         physical_button_to_timestamp[(controller, button)] = 0

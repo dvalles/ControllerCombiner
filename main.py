@@ -33,8 +33,8 @@ for controller in controllers:
     print(controller.get_name())
 
 # Initialize input combiner and virtual controller
-ic.Initialize(controllers)
-vc.Initialize(args.xbox)
+ic.initialize(controllers)
+vc.initialize(args.xbox)
 
 # Main loop
 running = True
@@ -45,11 +45,11 @@ while running:
             running = False
 
     #combine physical into unified virtual
-    combined = ic.GetCombinedControllers(controllers, args.timeframe)
+    combined = ic.get_combined_controllers(controllers, args.timeframe)
 
     #reset then set
-    vc.Reset()
-    vc.Update(combined)
+    vc.reset()
+    vc.update(combined)
 
     #small delay
     time.sleep(1/args.framerate)

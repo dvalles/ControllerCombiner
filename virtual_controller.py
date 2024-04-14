@@ -6,7 +6,7 @@ Handles setting the virtual controller buttons
 """
 
 #intializes the state of the module
-def Initialize(virtual_is_xbox):
+def initialize(virtual_is_xbox):
     #controller type
     global is_xbox
     is_xbox = virtual_is_xbox
@@ -19,14 +19,14 @@ def Initialize(virtual_is_xbox):
         virtual_gamepad = vg.VDS4Gamepad()
 
 #reset necessary state of virtual controller
-def Reset():
+def reset():
     virtual_gamepad.reset()
     # if is_ds4: <- I'll leave for posterity
     #     #because it uses a none enum to turn off they're all tied and I can't handle them individually, reset before frame
     #     virtual_gamepad.directional_pad(vg.DS4_DPAD_DIRECTIONS.DS4_BUTTON_DPAD_NONE) 
 
 #update state of virtual controller with a combined controller
-def Update(combined_controller):
+def update(combined_controller):
     #triggers
     triggers = combined_controller.triggers
     _update_triggers(triggers)
@@ -63,37 +63,37 @@ def _update_analog_sticks(analogs):
 def _update_buttons(buttons):
     for virtual_button, is_pressed in buttons.items():
         if is_xbox:
-            _setXboxVirtualButton(virtual_gamepad, virtual_button, is_pressed)
+            _set_xbox_virtual_button(virtual_gamepad, virtual_button, is_pressed)
         else:
             virtual_button = data.xbox_to_ds4_vigembus[virtual_button]
-            _setDS4VirtualButton(virtual_gamepad, virtual_button, is_pressed)
+            _set_ds4_virtual_button(virtual_gamepad, virtual_button, is_pressed)
 
 #sets a xbox virtual controller button
-def _setXboxVirtualButton(virtual_gamepad, virtual_button, pressed):
-    _setButton(virtual_gamepad, virtual_button, pressed)
+def _set_xbox_virtual_button(virtual_gamepad, virtual_button, pressed):
+    _set_button(virtual_gamepad, virtual_button, pressed)
 
 #sets a ds4 virtual controller button
-def _setDS4VirtualButton(virtual_gamepad, virtual_button, pressed):
+def _set_ds4_virtual_button(virtual_gamepad, virtual_button, pressed):
     if virtual_button == vg.DS4_SPECIAL_BUTTONS.DS4_SPECIAL_BUTTON_PS: 
-        _setSpecialButton(virtual_gamepad, virtual_button, pressed)
+        _set_special_button(virtual_gamepad, virtual_button, pressed)
     elif virtual_button in data.ds4_special_buttons:
-        _setDPadButton(virtual_gamepad, virtual_button, pressed)
+        _set_dpad_button(virtual_gamepad, virtual_button, pressed)
     else:
-        _setButton(virtual_gamepad, virtual_button, pressed)
+        _set_button(virtual_gamepad, virtual_button, pressed)
 
 #wrapper for press/release
-def _setButton(gamepad, vigemButton, pressed):
+def _set_button(gamepad, vigemButton, pressed):
     if pressed:
         gamepad.press_button(vigemButton)
     else:
         gamepad.release_button(vigemButton)
 
-def _setSpecialButton(gamepad, vigemButton, pressed):
+def _set_special_button(gamepad, vigemButton, pressed):
     if pressed:
         gamepad.press_special_button(vigemButton)
     else:
         gamepad.release_special_button(vigemButton)
 
-def _setDPadButton(gamepad, vigemButton, pressed):
+def _set_dpad_button(gamepad, vigemButton, pressed):
     if pressed:
         gamepad.directional_pad(vigemButton)
