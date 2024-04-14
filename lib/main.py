@@ -38,7 +38,7 @@ vc.initialize(args.xbox)
 
 #run the gui, wait a sec for initialization on other thread
 gui.start()
-time.sleep(1)
+time.sleep(.1)
 
 # Main loop
 running = True

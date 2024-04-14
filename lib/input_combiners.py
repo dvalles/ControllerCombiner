@@ -4,7 +4,7 @@ import time
 import virtual_controller
 
 """
-Handles combining the inputs of multiple controllers
+Handles combining the inputs of however many physical controllers connected
 """
 
 # last time button pressed (joystick, button) -> timestamp
@@ -94,10 +94,10 @@ def _check_button(controllers, virtual_button, press_timeframe):
     all_pressing = True
     for controller in controllers:
         #get pressed
-        if "PS4" in controller.get_name():
-            pressed = _is_pressed_ds4(controller, virtual_button)
-        elif "Xbox" in controller.get_name():
+        if "Xbox" in controller.get_name():
             pressed = _is_pressed_xbox(controller, virtual_button)
+        else:
+            pressed = _is_pressed_playstation(controller, virtual_button)
 
         #set state
         all_pressing &= pressed
@@ -137,8 +137,8 @@ def _check_button(controllers, virtual_button, press_timeframe):
     return all_pressing
 
 
-#gets if a button is down assuming a ds4
-def _is_pressed_ds4(controller, virtual_button):
+#gets if a button is down assuming a playstation controller (ds4, dualsense)
+def _is_pressed_playstation(controller, virtual_button):
     correct_index = data.button_to_ps4_index[virtual_button]
     return controller.get_button(correct_index)
 
