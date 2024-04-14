@@ -1,5 +1,9 @@
 import vgamepad as vg
 
+"""
+Data and mappings that are useful across the project
+"""
+
 #all the xbox buttons
 vg_buttons_xbox = [
     vg.XUSB_BUTTON.XUSB_GAMEPAD_A,
