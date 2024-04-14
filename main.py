@@ -36,8 +36,6 @@ for controller in controllers:
 ic.Initialize(controllers, args.xbox, args.timeframe)
 vc.Initialize(args.xbox)
 
-sleep_time = 1/args.framerate
-
 # Main loop
 running = True
 while running:
@@ -54,7 +52,7 @@ while running:
     vc.Update(combined)
 
     #small delay
-    time.sleep(sleep_time)
+    time.sleep(1/args.framerate)
 
 # Cleanup
 pygame.quit()
