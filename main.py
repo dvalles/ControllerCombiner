@@ -4,6 +4,7 @@ import time
 import argparse
 import printers
 import input_combiners as ic
+import virtual_controller as vc
 
 #----- MAIN ------
 
@@ -31,38 +32,31 @@ for controller in controllers:
     controller.init()
     print(controller.get_name())
 
-# Initialize input combiner
+# Initialize input combiner and virtual controller
 ic.Initialize(controllers, args.xbox, args.timeframe)
-
-# Create a virtual Xbox 360 or ds4 gamepad
-if args.xbox:
-    virtual_gamepad = vg.VX360Gamepad()
-else:
-    virtual_gamepad = vg.VDS4Gamepad()
+vc.Initialize(args.xbox)
 
 sleep_time = 1/args.framerate
 
 # Main loop
 running = True
 while running:
-    # Event loop (necessary to process joystick events)
+    #run pygame to update physical controllers
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    ic.HandleAnalogSticks(controllers, virtual_gamepad)
-    ic.HandleTriggerButtons(controllers, virtual_gamepad)
-    ic.HandleButtons(controllers, virtual_gamepad)
-    # printers.PrintButtons(joysticks)
-    # printers.PrintHats(joysticks)
+    #combine physical into unified virtual
+    combined = ic.GetCombinedControllers(controllers)
+    # printers.PrintButtons(controllers)
+    # printers.PrintHats(controllers)
 
-    #update at end of frame
-    virtual_gamepad.update()
+    #reset then set
+    vc.Reset()
+    vc.Update(combined)
 
     #small delay
     time.sleep(sleep_time)
 
 # Cleanup
 pygame.quit()
-virtual_gamepad.reset()
-virtual_gamepad.update()
