@@ -1,12 +1,13 @@
-# Controller Combiner
+# Controller Averager
 
-We've all been there.. you've got 5 people who want to game it up, but it's a 4 person game. You think to yourself.. I wish I could combine controls with my friend and we could act as one virtual controller. Then we could all game. Then all would be right in the world.
+We've all been there.. you've got 5 people who want to game it up, but it's a 4 person game. You think to yourself.. I wish I could just average controls with my friend and we could act as one virtual controller. Then we could all game. Then all would be right in the world.
 
 But you can't combine controls, you can't all game, you can't have fun... until now!
 
+
 ## Setup:
 
-I'm not going to go to deep before people are even using the thing, but basically -
+I'm not going to go to deep before people are even using the thing, but basically...
 
 1. **Install Python**
    - Make sure you have the latest stable version of Python installed.
@@ -17,11 +18,15 @@ I'm not going to go to deep before people are even using the thing, but basicall
 3. **Install HidHide**
    - Hides physical controllers from games
 
-4. **Download Repository**
+4. **Allow python to see through HidHide**
+   - In the applications section of the HidHide config client add python.exe, should be under User\AppData\Local\Programs\Python\PythonVersion\
+
+6. **Download Repository**
    - Download the repository and create a shortcut for the `start.bat` file.
 
-5. **Set Environment Variable**
+7. **Set Environment Variable**
     - Setup an environment variable called HID_HIDE that points to the folder HidHideClient.exe is in
+
 
 ## How To Use:
 
@@ -44,3 +49,10 @@ There's a little gui that allows you to set timeframe and framerate -
 ### Launch
 
 Run the `start.bat` file or run the desktop shortcut you created which points to `start.bat`
+
+
+## Troubleshooting:
+
+https://gamepadviewer.com/ is nice for checking that your physical controllers and the virtual one are coming through
+
+DS4 controller seem to have trouble in general with connecting to windows, so first check that it's connecting properly
