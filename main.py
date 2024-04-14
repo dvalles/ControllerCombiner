@@ -13,8 +13,6 @@ import printers
 # Create the parser
 parser = argparse.ArgumentParser(description="Combines 2 controllers into a single virtual one")
 parser.add_argument('--xbox', action='store_true', help='Makes the virtual controller an xbox 360, instead of a DS4')
-parser.add_argument('--framerate', type=float, default=60, help='Set the update framerate')
-parser.add_argument('--timeframe', type=float, default=.5, help='Set the time interval for checking button presses')
 args = parser.parse_args()
 
 # Initialize Pygame for controller input
