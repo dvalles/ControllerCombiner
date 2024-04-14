@@ -27,11 +27,28 @@ def Reset():
 
 #update state of virtual controller with a combined controller
 def Update(combined_controller):
+    #triggers
     triggers = combined_controller.triggers
+    _update_triggers(triggers)
+
+    #analog sticks
+    analogs = combined_controller.analogs
+    _update_analog_sticks(analogs)
+
+    #buttons
+    buttons = combined_controller.buttons
+    _update_buttons(buttons)
+    
+    #update vigembus
+    virtual_gamepad.update()
+
+#update the virtual controller triggers
+def _update_triggers(triggers):
     virtual_gamepad.left_trigger_float(value_float=triggers[0])
     virtual_gamepad.right_trigger_float(value_float=triggers[1])
 
-    analogs = combined_controller.analogs
+#update the virtual controller analog sticks
+def _update_analog_sticks(analogs):
     #need to flip vertical components for xbox 360
     if is_ds4:
         flip = 1
@@ -42,17 +59,14 @@ def Update(combined_controller):
     virtual_gamepad.left_joystick_float(x_value_float=analogs[0], y_value_float=flip*analogs[1])
     virtual_gamepad.right_joystick_float(x_value_float=analogs[2], y_value_float=flip*analogs[3])
 
-    #set virtual controller accordingly
-    buttons = combined_controller.buttons
+#update the virtual controller buttons
+def _update_buttons(buttons):
     for virtual_button, is_pressed in buttons.items():
         if is_ds4:
             virtual_button = data.xbox_to_ds4_vigembus[virtual_button]
             _setDS4VirtualButton(virtual_gamepad, virtual_button, is_pressed)
         else:
             _setXboxVirtualButton(virtual_gamepad, virtual_button, is_pressed)
-    
-    #update vigembus
-    virtual_gamepad.update()
 
 #sets a xbox virtual controller button
 def _setXboxVirtualButton(virtual_gamepad, virtual_button, pressed):
