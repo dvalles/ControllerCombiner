@@ -2,16 +2,16 @@
 Some prints that might be useful
 """
 
-#prints the hat values of a physical joystick
-def PrintHats(joysticks):
-    for joystick in joysticks:
-        if "Xbox" in joystick.get_name():
-            print(joystick.get_hat(0))
+#prints the hat values of a physical xbox controller
+def PrintHats(controllers):
+    for controller in controllers:
+        if "Xbox" in controller.get_name():
+            print(controller.get_hat(0))
 
-#prints the button index when they're pressed and denotes the controller type
-def PrintButtons(joysticks):
-    for joystick in joysticks:
+#prints the button index when they're pressed and denotes the physical controller type
+def PrintButtons(controllers):
+    for controller in controllers:
         for i in range(16):
-            held = joystick.get_button(i)
+            held = controller.get_button(i)
             if held:
-                print(f"{joystick.get_name()} {i}")
+                print(f"{controller.get_name()} {i}")
