@@ -56,3 +56,5 @@ Run the `start.bat` file or run the desktop shortcut you created which points to
 https://gamepadviewer.com/ is nice for checking that your physical controllers and the virtual one are coming through
 
 DS4 controller seem to have trouble in general with connecting to windows, so first check that it's connecting properly
+
+Its possible the computer isn't recognizing the virtual ds4 controller because its ds4. Open the start.bat file in a text editor and add a space then --xbox add the end of line 7, save and try again. This creates an xbox 360 virtual controller instead
