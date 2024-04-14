@@ -8,12 +8,12 @@ Handles setting the virtual controller buttons
 #intializes the state of the module
 def Initialize(virtual_is_xbox):
     #controller type
-    global is_ds4
-    is_ds4 = not virtual_is_xbox
+    global is_xbox
+    is_xbox = virtual_is_xbox
 
     # Create a virtual Xbox 360 or ds4 gamepad
     global virtual_gamepad
-    if not is_ds4:
+    if is_xbox:
         virtual_gamepad = vg.VX360Gamepad()
     else:
         virtual_gamepad = vg.VDS4Gamepad()
@@ -50,10 +50,10 @@ def _update_triggers(triggers):
 #update the virtual controller analog sticks
 def _update_analog_sticks(analogs):
     #need to flip vertical components for xbox 360
-    if is_ds4:
-        flip = 1
-    else:
+    if is_xbox:
         flip = -1
+    else:
+        flip = 1
 
     # Set the averaged values to the virtual gamepad
     virtual_gamepad.left_joystick_float(x_value_float=analogs[0], y_value_float=flip*analogs[1])
@@ -62,11 +62,11 @@ def _update_analog_sticks(analogs):
 #update the virtual controller buttons
 def _update_buttons(buttons):
     for virtual_button, is_pressed in buttons.items():
-        if is_ds4:
+        if is_xbox:
+            _setXboxVirtualButton(virtual_gamepad, virtual_button, is_pressed)
+        else:
             virtual_button = data.xbox_to_ds4_vigembus[virtual_button]
             _setDS4VirtualButton(virtual_gamepad, virtual_button, is_pressed)
-        else:
-            _setXboxVirtualButton(virtual_gamepad, virtual_button, is_pressed)
 
 #sets a xbox virtual controller button
 def _setXboxVirtualButton(virtual_gamepad, virtual_button, pressed):
