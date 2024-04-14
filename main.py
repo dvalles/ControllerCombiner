@@ -47,9 +47,7 @@ while running:
             running = False
 
     #combine physical into unified virtual
-    combined = ic.GetCombinedControllers(controllers)
-    # printers.PrintButtons(controllers)
-    # printers.PrintHats(controllers)
+    combined = ic.GetCombinedControllers(controllers, args.timeframe)
 
     #reset then set
     vc.Reset()

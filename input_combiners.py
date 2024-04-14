@@ -11,8 +11,6 @@ Handles combining the inputs of multiple controllers
 physical_button_to_timestamp = {}
 # should reset button timestamps? button -> bool
 should_reset = {}
-# timeframe within which pressing both buttons will consider a virtual button pressed
-press_timeframe = 0
 
 #holds data on which buttons are pressed/how much they're pressed
 class CombinedController:
@@ -22,17 +20,15 @@ class CombinedController:
         self.buttons = {button: False for button in data.vg_buttons_xbox}
 
 #Combine controllers into one representation, return that representation
-def GetCombinedControllers(controllers):
+def GetCombinedControllers(controllers, button_press_timeframe):
     cc = CombinedController()
     cc.analogs = _handleAnalogSticks(controllers)
     cc.triggers = _handleTriggerButtons(controllers)
-    cc.buttons = _handleButtons(controllers)
+    cc.buttons = _handleButtons(controllers, button_press_timeframe)
     return cc
 
 #Initializes the necessary state
 def Initialize(controllers, is_xbox, timeframe):
-    global press_timeframe
-
     #initialize timestamp dict
     for controller in controllers:
         for button in data.vg_buttons_xbox:
@@ -40,8 +36,6 @@ def Initialize(controllers, is_xbox, timeframe):
     #initialize should reset
     for button in data.vg_buttons_xbox:
         should_reset[button] = False
-    #set timeframe
-    press_timeframe = timeframe
 
 #Handles the left and right trigger buttons
 def _handleTriggerButtons(controllers):
@@ -83,18 +77,18 @@ def _handleAnalogSticks(controllers):
     return (lx_avg, ly_avg, rx_avg, ry_avg)
 
 #handles the buttons
-def _handleButtons(controllers):
+def _handleButtons(controllers, press_timeframe):
     result = {}
 
     #for each virtual button check if physical counterpart is 'pressed' in that all physical controllers are pressing
     for virtual_button in data.vg_buttons_xbox:
-        all_pressed = _check_button(controllers, virtual_button)
+        all_pressed = _check_button(controllers, virtual_button, press_timeframe)
         result[virtual_button] = all_pressed
 
     return result
 
 #checks if a button is pressed across all controllers
-def _check_button(controllers, virtual_button):
+def _check_button(controllers, virtual_button, press_timeframe):
     timestamps = []
     anyone_pressing = False
     all_pressing = True
@@ -129,7 +123,7 @@ def _check_button(controllers, virtual_button):
     #check if within time interval
     within = False
     if len(timestamps) == len(controllers):
-        within = _withinTimeframe(timestamps)
+        within = _withinTimeframe(timestamps, press_timeframe)
     
     #clear timestamp and set button pressed
     if within:
@@ -164,7 +158,7 @@ def _isPressedXbox(controller, virtual_button):
     return controller.get_button(correct_index)
 
 #checks timestamps are within time frame of eachother
-def _withinTimeframe(timestamps):
+def _withinTimeframe(timestamps, press_timeframe):
     max_value = max(timestamps)
     min_value = min(timestamps)
     return (max_value - min_value) < press_timeframe

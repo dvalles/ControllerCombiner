@@ -21,7 +21,7 @@ def Initialize(virtual_is_xbox):
 #reset necessary state of virtual controller
 def Reset():
     virtual_gamepad.reset()
-    # if is_ds4:
+    # if is_ds4: <- I'll leave for posterity
     #     #because it uses a none enum to turn off they're all tied and I can't handle them individually, reset before frame
     #     virtual_gamepad.directional_pad(vg.DS4_DPAD_DIRECTIONS.DS4_BUTTON_DPAD_NONE) 
 
