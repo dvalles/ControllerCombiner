@@ -1,10 +1,12 @@
+import sys
 import pygame
 import vgamepad as vg
 import time
 import argparse
-import printers
 import input_combiners as ic
 import virtual_controller as vc
+import gui
+import printers
 
 #----- MAIN ------
 
@@ -36,23 +38,35 @@ for controller in controllers:
 ic.initialize(controllers)
 vc.initialize(args.xbox)
 
+#run the gui, wait a sec for initialization on other thread
+gui.start()
+time.sleep(1)
+
 # Main loop
 running = True
 while running:
+    #gui has stopped
+    if gui.has_stopped():
+        break
+
     #run pygame to update physical controllers
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
+    #get gui values
+    params = gui.get_values()
+
     #combine physical into unified virtual
-    combined = ic.get_combined_controllers(controllers, args.timeframe)
+    combined = ic.get_combined_controllers(controllers, params.timeframe)
 
     #reset then set
     vc.reset()
     vc.update(combined)
 
     #small delay
-    time.sleep(1/args.framerate)
+    time.sleep(1/params.framerate)
 
 # Cleanup
 pygame.quit()
+sys.exit()
