@@ -28,7 +28,7 @@ def GetCombinedControllers(controllers, button_press_timeframe):
     return cc
 
 #Initializes the necessary state
-def Initialize(controllers, is_xbox, timeframe):
+def Initialize(controllers):
     #initialize timestamp dict
     for controller in controllers:
         for button in data.vg_buttons_xbox:

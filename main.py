@@ -33,7 +33,7 @@ for controller in controllers:
     print(controller.get_name())
 
 # Initialize input combiner and virtual controller
-ic.Initialize(controllers, args.xbox, args.timeframe)
+ic.Initialize(controllers)
 vc.Initialize(args.xbox)
 
 # Main loop
