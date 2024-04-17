@@ -95,12 +95,11 @@ def _check_button(controllers, virtual_button, press_timeframe, use_config):
     for controller in controllers:
         #get pressed
         if "Xbox" in controller.get_name():
+            pressed = _is_pressed_xbox(controller, virtual_button)
             #config mapping
             if use_config and virtual_button in configs.temoor_rocket_league:
                 vb_configged = configs.temoor_rocket_league[virtual_button]
-            else:
-                vb_configged = virtual_button
-            pressed = _is_pressed_xbox(controller, vb_configged)
+                pressed |= _is_pressed_xbox(controller, vb_configged)
         else:
             pressed = _is_pressed_playstation(controller, virtual_button)
 
@@ -143,23 +142,23 @@ def _check_button(controllers, virtual_button, press_timeframe, use_config):
 
 
 #gets if a button is down assuming a playstation controller (ds4, dualsense)
-def _is_pressed_playstation(controller, virtual_button):
-    correct_index = data.button_to_ps4_index[virtual_button]
+def _is_pressed_playstation(controller, physical_button):
+    correct_index = data.button_to_ps4_index[physical_button]
     return controller.get_button(correct_index)
 
 #gets if a button is down assuming an xbox one
-def _is_pressed_xbox(controller, virtual_button):
+def _is_pressed_xbox(controller, physical_button):
     #d-pad is special case
-    if virtual_button == vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_LEFT:
+    if physical_button == vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_LEFT:
         return controller.get_hat(0)[0] == -1
-    if virtual_button == vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_RIGHT:
+    if physical_button == vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_RIGHT:
         return controller.get_hat(0)[0] == 1
-    if virtual_button == vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_UP:
+    if physical_button == vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_UP:
         return controller.get_hat(0)[1] == 1
-    if virtual_button == vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_DOWN:
+    if physical_button == vg.XUSB_BUTTON.XUSB_GAMEPAD_DPAD_DOWN:
         return controller.get_hat(0)[1] == -1
     #otherwise just button
-    correct_index = data.button_to_xbox_index[virtual_button]
+    correct_index = data.button_to_xbox_index[physical_button]
     return controller.get_button(correct_index)
 
 #checks timestamps are within time frame of eachother
