@@ -2,7 +2,7 @@
 
 We've all been there.. you've got 5 people who want to game it up, but it's a 4 person game. You think to yourself.. I wish I could just average controls with my friend and we could act as one virtual controller. Then we could all game. Then all would be right in the world.
 
-But you can't combine controls, you can't all game, you can't have fun... until now!
+But you can't combine controls... you can't all game... you can't have fun... until now!
 
 
 ## Setup:
