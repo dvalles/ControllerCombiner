@@ -1,12 +1,13 @@
 import sys
 import threading
 import tkinter as tk
-from tkinter import DoubleVar
+from tkinter import DoubleVar, BooleanVar
 
 class GuiVals:
-    def __init__(self, framerate, timeframe):
+    def __init__(self, framerate, timeframe, use_config):
         self.framerate = framerate
         self.timeframe = timeframe
+        self.use_config = use_config
 
 def start():
     global init_complete, shutdown_complete
@@ -17,15 +18,17 @@ def start():
     gui_thread.start()
 
 def _run_gui():
-    global root, framerate_var, timeframe_var
+    global root, framerate_var, timeframe_var, use_config_var
     root = tk.Tk()
     root.title("Settings")
 
     framerate_var = DoubleVar(value=60)
     timeframe_var = DoubleVar(value=0.5)
+    use_config_var = BooleanVar(value=False)
 
     tk.Scale(root, from_=1, to=120, orient='horizontal', label='Framerate', variable=framerate_var).pack()
     tk.Scale(root, from_=0.1, to=2, resolution=0.1, orient='horizontal', label='Timeframe', variable=timeframe_var).pack()
+    tk.Checkbutton(root, text="Use controller configs", variable=use_config_var).pack()
 
     init_complete.set()
     root.protocol("WM_DELETE_WINDOW", _on_close)
@@ -34,7 +37,7 @@ def _run_gui():
 def get_values():
     if not init_complete.is_set():
         init_complete.wait()  # Block until GUI is ready
-    return GuiVals(framerate_var.get(), timeframe_var.get())
+    return GuiVals(framerate_var.get(), timeframe_var.get(), use_config_var.get())
 
 def has_stopped():
     return shutdown_complete.is_set()

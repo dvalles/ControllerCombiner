@@ -1,7 +1,7 @@
 import data
 import vgamepad as vg
 import time
-import virtual_controller
+import configs
 
 """
 Handles combining the inputs of however many physical controllers connected
@@ -20,11 +20,11 @@ class CombinedController:
         self.buttons = {button: False for button in data.vg_buttons_xbox}
 
 #Combine controllers into one representation, return that representation
-def get_combined_controllers(controllers, button_press_timeframe):
+def get_combined_controllers(controllers, button_press_timeframe, use_config):
     cc = CombinedController()
     cc.analogs = _handle_analog_sticks(controllers)
     cc.triggers = _handle_trigger_buttons(controllers)
-    cc.buttons = _handle_buttons(controllers, button_press_timeframe)
+    cc.buttons = _handle_buttons(controllers, button_press_timeframe, use_config)
     return cc
 
 #Initializes the necessary state
@@ -77,25 +77,30 @@ def _handle_analog_sticks(controllers):
     return (lx_avg, ly_avg, rx_avg, ry_avg)
 
 #handles the buttons
-def _handle_buttons(controllers, press_timeframe):
+def _handle_buttons(controllers, press_timeframe, use_config):
     result = {}
 
     #for each virtual button check if physical counterpart is 'pressed' in that all physical controllers are pressing
     for virtual_button in data.vg_buttons_xbox:
-        all_pressed = _check_button(controllers, virtual_button, press_timeframe)
+        all_pressed = _check_button(controllers, virtual_button, press_timeframe, use_config)
         result[virtual_button] = all_pressed
 
     return result
 
 #checks if a button is pressed across all controllers
-def _check_button(controllers, virtual_button, press_timeframe):
+def _check_button(controllers, virtual_button, press_timeframe, use_config):
     timestamps = []
     anyone_pressing = False
     all_pressing = True
     for controller in controllers:
         #get pressed
         if "Xbox" in controller.get_name():
-            pressed = _is_pressed_xbox(controller, virtual_button)
+            #config mapping
+            if use_config and virtual_button in configs.temoor_rocket_league:
+                vb_configged = configs.temoor_rocket_league[virtual_button]
+            else:
+                vb_configged = virtual_button
+            pressed = _is_pressed_xbox(controller, vb_configged)
         else:
             pressed = _is_pressed_playstation(controller, virtual_button)
 

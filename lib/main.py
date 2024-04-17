@@ -56,7 +56,7 @@ while running:
     params = gui.get_values()
 
     #combine physical into unified virtual
-    combined = ic.get_combined_controllers(controllers, params.timeframe)
+    combined = ic.get_combined_controllers(controllers, params.timeframe, params.use_config)
 
     #reset then set
     vc.reset()
