@@ -45,6 +45,8 @@ There's a little gui that allows you to set timeframe and framerate -
 **timeframe** - the time window in which if all n physical controllers press the button, the virtual button is pressed
 **framerate** - the rate at which the virtual controller checks for updates. if you set this higher than the framerate of the
             game, the game will miss controller events. Just set it to fps/2 for some nyquist action
+**Consensus at** - set the number of people who must press a button before the button is considered pressed. Allows for easier gameplay
+**Use controller configs** - allows you to turn on a remapping of one persons controls, in case its a game where each person is used to different controls. This is hardcoded for now and you'd have to know how to program to change it
 
 ### Launch
 
