@@ -20,11 +20,11 @@ class CombinedController:
         self.buttons = {button: False for button in data.vg_buttons_xbox}
 
 #Combine controllers into one representation, return that representation
-def get_combined_controllers(controllers, button_press_timeframe, use_config):
+def get_combined_controllers(controllers, button_press_timeframe, use_config, consensus_at):
     cc = CombinedController()
     cc.analogs = _handle_analog_sticks(controllers)
     cc.triggers = _handle_trigger_buttons(controllers)
-    cc.buttons = _handle_buttons(controllers, button_press_timeframe, use_config)
+    cc.buttons = _handle_buttons(controllers, button_press_timeframe, use_config, consensus_at)
     return cc
 
 #Initializes the necessary state
@@ -77,21 +77,22 @@ def _handle_analog_sticks(controllers):
     return (lx_avg, ly_avg, rx_avg, ry_avg)
 
 #handles the buttons
-def _handle_buttons(controllers, press_timeframe, use_config):
+def _handle_buttons(controllers, press_timeframe, use_config, consensus_at):
     result = {}
 
     #for each virtual button check if physical counterpart is 'pressed' in that all physical controllers are pressing
     for virtual_button in data.vg_buttons_xbox:
-        all_pressed = _check_button(controllers, virtual_button, press_timeframe, use_config)
+        all_pressed = _check_button(controllers, virtual_button, press_timeframe, use_config, consensus_at)
         result[virtual_button] = all_pressed
 
     return result
 
 #checks if a button is pressed across all controllers
-def _check_button(controllers, virtual_button, press_timeframe, use_config):
+def _check_button(controllers, virtual_button, press_timeframe, use_config, consensus_at):
     timestamps = []
     anyone_pressing = False
     all_pressing = True
+    num_pressed = 0
     for controller in controllers:
         #get pressed
         if "Xbox" in controller.get_name():
@@ -106,6 +107,7 @@ def _check_button(controllers, virtual_button, press_timeframe, use_config):
         #set state
         all_pressing &= pressed
         anyone_pressing |= pressed
+        num_pressed += pressed
 
         #set timestamp if needed
         if pressed:
@@ -126,13 +128,17 @@ def _check_button(controllers, virtual_button, press_timeframe, use_config):
 
     #check if within time interval
     within = False
-    if len(timestamps) == len(controllers):
+    if len(timestamps) >= min(consensus_at, len(controllers)):
         within = _within_timeframe(timestamps, press_timeframe)
     
     #clear timestamp and set button pressed
     if within:
         all_pressing = True
         _clear_timestamps(controllers, virtual_button)
+    
+    #enough have pressed to be considered pressed
+    if num_pressed >= consensus_at:
+        all_pressing = True
 
     #it's been pressed, reset until everyone releases button
     if all_pressing:
